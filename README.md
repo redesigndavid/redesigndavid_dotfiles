@@ -1,1 +1,1 @@
-# redesigndavid_dotfiles
+# just personal dotfiles 
