@@ -1,0 +1,168 @@
+" make sure that plug.vim is installed
+if empty(glob('~/.vim/autoload/plug.vim'))
+  silent !curl -fLo ~/.vim/autoload/plug.vim --create-dirs
+    \ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+  autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
+endif
+
+" Specify a directory for plugins
+call plug#begin('~/.vim/plugged')
+Plug 'easymotion/vim-easymotion'
+Plug 'junegunn/goyo.vim'
+Plug 'w0rp/ale'
+Plug 'jnurmine/Zenburn'
+Plug 'vim-airline/vim-airline'
+Plug 'vim-airline/vim-airline-themes'
+Plug 'tomasr/molokai'
+Plug 'davidhalter/jedi-vim'
+Plug 'hecal3/vim-leader-guide'
+Plug 'mhinz/vim-signify'
+"Plug 'redesigndavid/rboard_vim'
+Plug 'ntpeters/vim-better-whitespace'
+Plug 'whatyouhide/vim-lengthmatters'
+Plug 'garbas/vim-snipmate'
+Plug 'honza/vim-snippets'
+Plug 'MarcWeber/vim-addon-mw-utils'
+Plug 'tomtom/tlib_vim'
+call plug#end()
+
+syntax on
+filetype plugin indent on
+
+" automatically reload .vimrc
+autocmd! bufwritepost .vimrc source %
+
+" eco files
+au BufNewFile,BufRead *.eco set filetype=python
+au BufNewFile,BufRead *.eco3 set filetype=javascript
+
+" some prefs
+set textwidth=79
+set softtabstop=4
+set shiftwidth=4
+set autoindent
+set tabstop=4
+set shiftround
+set expandtab
+set laststatus=2
+set history=700
+set undolevels=700
+set number
+set relativenumber
+
+" make search case insensitive
+set hlsearch
+set incsearch
+set ignorecase
+set smartcase
+set bs=2
+set t_ut=
+
+" disable stupid backup and swap files - they trigger too many events
+set nowritebackup
+set noswapfile
+
+" better copy and paste
+set pastetoggle=<F2>
+set clipboard=unnamed
+
+" rebind leader key
+let mapleader = ","
+
+" python paths
+python << EOF
+import os
+import sys
+import vim
+sys.path += [
+    '/home/dmarte/jira_python_dmarte/lib/python2.6/site-packages',
+    '/dept/atd/dev/dmarte/home_python',
+    '/home/dmarte/vimpython']
+for p in sys.path:
+    # Add each directory in sys.path, if it exists.
+    if os.path.isdir(p):
+        # Command 'set' needs backslash before each space.
+        vim.command(r"set path+=%s" % (p.replace(" ", r"\ ")))
+del os, sys, vim
+EOF
+
+" ale lint setup
+let g:ale_lint_delay = 10
+let g:ale_python_flake8_executable = 'flake8'
+
+" jedi setup
+let jedi#goto_command = ''
+let jedi#goto_assignments_command = ''
+let jedi#goto_definitions_command = ''
+let jedi#rename_command = ''
+
+" abbreviations
+ia pdbpdb import pdb;  # XXXpdb.set_trace();  # XXX
+ia pyqtpdb from PyQt4.QtCore import pyqtRemoveInputHook;  # XXXpyqtRemoveInputHook();  # XXXimport pdb;pdb.set_trace();  # XXX
+
+" easy motion setup
+let g:EasyMotion_do_mapping = 0
+let g:EasyMotion_enter_jump_first = 1
+map <Leader>js <Plug>(easymotion-s)
+map <Leader>jf <Plug>(easymotion-f)
+map <Leader>jt <Plug>(easymotion-t)
+
+" leader guide display renamer
+let s:leader_value_lookup = {
+    \ '<Plug>(easymotion-s)': 'easymotion s',
+    \ '<Plug>(easymotion-f)': 'easymotion f',
+    \ '<Plug>(easymotion-t)': 'easymotion t',
+    \}
+function! s:leader_value_displayFunc()
+    let g:leaderGuide#displayname =
+        \get(s:leader_value_lookup, g:leaderGuide#displayname,
+        \g:leaderGuide#displayname)
+endfunction
+let g:leaderGuide_displayfunc = [function("s:leader_value_displayFunc")]
+
+" netrw
+let netrw_keepdir = 1
+
+" leader map
+let g:lmap = {}
+let g:lmap.j = {'name': 'jumps'}
+let g:lmap.j.j = ['call jedi#goto()', 'go to a python definition or assignment']
+let g:lmap.j.d = ['call jedi#goto_definitions()', 'go to a python definition']
+let g:lmap.j.a = ['call jedi#goto_assignments()', 'go to a python assignment']
+
+let g:lmap.t = {'name': 'toggles'}
+let g:lmap.t.n = ["set number!", "toggle numbers"]
+let g:lmap.t.s = ["set spell spelllang=en_us", 'spell check']
+let g:lmap.t.c = ["set cursorline!", 'toggle line highlight']
+let g:lmap.t.C = ["set cursorcolumn!", 'toggle column highlight']
+let g:lmap.t.8 = ["LengthmattersToggle", 'toggle column highlight']
+
+let g:lmap.w = {"name": "window"}
+let g:lmap.w.z = ["Goyo", "window zoom toggle"]
+let g:lmap.w.w = ["ToggleWhitespace", "toggle whitespace"]
+let g:lmap.w.t = ["tabnew", "tab new"]
+let g:lmap.w.c = ["tabclose","tab close"]
+
+let g:lmap.q = {'name': 'quick keys'}
+let g:lmap.q.w = ["StripWhitespace", "remove trailing whitespace"]
+
+call leaderGuide#register_prefix_descriptions(",", "g:lmap")
+nnoremap <silent> <leader> :<c-u>LeaderGuide ','<CR>
+vnoremap <silent> <leader> :<c-u>LeaderGuideVisual ','<CR>
+
+let g:rboardurl = 'http://reviewboard'
+let g:rboardusep4 = 1
+let g:rboardmodern = 0
+
+" vimsig
+let g:signify_vcs_list = ['perforce', 'git']
+let g:signify_realtime = 0
+let g:signify_cursorhold_normal = 0
+
+set background=dark
+colorscheme molokai
+
+hi CursorLine   cterm=NONE ctermbg=darkred ctermfg=white guibg=darkred guifg=white
+hi CursorColumn cterm=NONE ctermbg=darkred ctermfg=white guibg=darkred guifg=white
+
+let g:lengthmatters_on_by_default = 0
